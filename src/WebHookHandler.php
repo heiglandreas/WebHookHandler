@@ -49,8 +49,18 @@ class WebHookHandler extends AbstractProcessingHandler
 
     private $asyncClient;
 
+    /**
+     * WebHookHandler constructor.
+     *
+     * @param \Psr\Http\Message\UriInterface    $uri
+     * @param int                               $level
+     * @param \Http\Client\HttpAsyncClient|null $asyncClient
+     * @param \Http\Message\RequestFactory|null $requestFactory
+     * @param \Http\Message\StreamFactory|null  $streamFactory
+     */
     public function __construct(
         UriInterface $uri,
+        int $level,
         HttpAsyncClient $asyncClient = null,
         RequestFactory $requestFactory = null,
         StreamFactory $streamFactory = null
@@ -59,6 +69,7 @@ class WebHookHandler extends AbstractProcessingHandler
         $this->streamFactory = $streamFactory ?: StreamFactoryDiscovery::find();
         $this->asyncClient = $asyncClient ?: HttpAsyncClientDiscovery::find();
         $this->uri = $uri;
+        $this->level = $level;
     }
     /**
      * Writes the record down to the log of the implementing handler

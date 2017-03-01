@@ -45,7 +45,7 @@ class WebHookHandlerTest extends TestCase
         $uri = $uriFactory->createUri('http://example.com/');
 
         $client = new Client();
-        $handler = new WebHookHandler($uri, $client);
+        $handler = new WebHookHandler($uri, Logger::DEBUG, $client);
 
         $handler->handle([
             'level' => Logger::DEBUG,
