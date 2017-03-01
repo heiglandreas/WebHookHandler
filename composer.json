@@ -1,0 +1,39 @@
+{
+    "name" : "org_heigl/webhookhandler",
+    "type" : "library",
+    "description" : "A monolog-handler that POSTs to a webhook",
+    "keywords" : ["log", "logging", "monolog", "webhook"],
+    "homepage" : "https://github.com/heiglandreas/WebHookHandler",
+    "license" : "MIT",
+    "authors" : [{
+        "name":"Andreas Heigl",
+        "email" : "andreas@heigl.org",
+        "homepage" : "https://andreas.heigl.org",
+        "role" : "Developer"
+    }],
+    "support" : {
+        "email" : "andreas@heigl.org"
+    },
+    "require": {
+        "php" : "^7.0",
+        "monolog/monolog" : "^1.0",
+        "php-http/client-implementation": "^1.0",
+        "php-http/httplug": "^1.1",
+        "php-http/message": "^1.5"
+    },
+    "require-dev": {
+        "php-http/mock-client": "^0.3",
+        "phpunit/phpunit": "^6.0",
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Org_Heigl\\WebHookHandler\\" : "src/"
+        }
+    },
+    "autoload-dev" : {
+        "psr-4" : {
+            "Org_Heigl\\WebHookHandlerTest\\" : "tests/"
+        }
+    }
+}
