@@ -29,8 +29,8 @@
 
 namespace Org_Heigl\WebHookHandlerTest;
 
+use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\UriFactoryDiscovery;
-use Http\Message\UriFactory\DiactorosUriFactory;
 use Http\Mock\Client;
 use Monolog\Logger;
 use Org_Heigl\WebHookHandler\WebHookHandler;
@@ -45,7 +45,12 @@ class WebHookHandlerTest extends TestCase
         $uri = $uriFactory->createUri('http://example.com/');
 
         $client = new Client();
-        $handler = new WebHookHandler($uri, Logger::DEBUG, $client);
+        $handler = new WebHookHandler(
+            $uri,
+            Logger::DEBUG,
+            $client,
+            MessageFactoryDiscovery::find()
+        );
 
         $handler->handle([
             'level' => Logger::DEBUG,
@@ -54,5 +59,6 @@ class WebHookHandlerTest extends TestCase
         ]);
 
         $this->assertInstanceof(RequestInterface::class, $client->getRequests()[0]);
+        $this->assertEquals('{"message":"[%datetime%] %channel%.%level_name%: %message% [] []\n","from":"","level":100,"extra":[],"context":[],"formatted":"[%datetime%] %channel%.%level_name%: %message% [] []\n"}', $client->getRequests()[0]->getBody()->getContents());
     }
 }

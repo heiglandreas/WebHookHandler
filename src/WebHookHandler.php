@@ -30,46 +30,47 @@
 namespace Org_Heigl\WebHookHandler;
 
 use Http\Client\HttpAsyncClient;
-use Http\Discovery\HttpAsyncClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\StreamFactoryDiscovery;
 use Http\Message\RequestFactory;
-use Http\Message\StreamFactory;
 use Monolog\Handler\AbstractProcessingHandler;
 use Psr\Http\Message\UriInterface;
 
 class WebHookHandler extends AbstractProcessingHandler
 {
+    /** @var RequestFactory  */
     private $requestFactory;
-
-    private $streamFactory;
 
     /** @var UriInterface  */
     private $uri;
 
+    /** @var HttpAsyncClient  */
     private $asyncClient;
+
+    /** @var string */
+    private $from = '';
 
     /**
      * WebHookHandler constructor.
      *
-     * @param \Psr\Http\Message\UriInterface    $uri
-     * @param int                               $level
-     * @param \Http\Client\HttpAsyncClient|null $asyncClient
-     * @param \Http\Message\RequestFactory|null $requestFactory
-     * @param \Http\Message\StreamFactory|null  $streamFactory
+     * @param \Psr\Http\Message\UriInterface $uri
+     * @param int                            $level
+     * @param \Http\Client\HttpAsyncClient   $asyncClient
+     * @param \Http\Message\RequestFactory   $requestFactory
      */
     public function __construct(
         UriInterface $uri,
         int $level,
-        HttpAsyncClient $asyncClient = null,
-        RequestFactory $requestFactory = null,
-        StreamFactory $streamFactory = null
+        HttpAsyncClient $asyncClient,
+        RequestFactory $requestFactory
     ) {
-        $this->requestFactory = $requestFactory ?: MessageFactoryDiscovery::find();
-        $this->streamFactory = $streamFactory ?: StreamFactoryDiscovery::find();
-        $this->asyncClient = $asyncClient ?: HttpAsyncClientDiscovery::find();
+        $this->requestFactory = $requestFactory;
+        $this->asyncClient = $asyncClient;
         $this->uri = $uri;
         $this->level = $level;
+    }
+
+    public function setFrom(string $from)
+    {
+        $this->from = $from;
     }
     /**
      * Writes the record down to the log of the implementing handler
@@ -80,14 +81,20 @@ class WebHookHandler extends AbstractProcessingHandler
      */
     protected function write(array $record)
     {
-        $request = $this->requestFactory->createRequest('POST', (string) $this->uri);
-        $stream = $this->streamFactory->createStream(json_encode(array_merge(
-            ['message' => $record['formatted']],
+        $body = json_encode(array_merge(
+            ['message' => $record['formatted'], 'from' => $this->from],
             $record
-        )));
+        ));
 
-        $request = $request->withBody($stream);
+        $request = $this->requestFactory->createRequest(
+            'POST',
+            (string) $this->uri,
+            ['Content-Type' => 'application/json'],
+            $body
+        );
 
-        $this->asyncClient->sendAsyncRequest($request);
+        $promise = $this->asyncClient->sendAsyncRequest($request);
+        // As sending asynchronous doesn't really work we send it synchronously…
+        $promise->wait();
     }
 }
