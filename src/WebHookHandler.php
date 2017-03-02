@@ -82,7 +82,7 @@ class WebHookHandler extends AbstractProcessingHandler
     protected function write(array $record)
     {
         $body = json_encode(array_merge(
-            ['message' => $record['formatted'], 'from' => $this->from],
+            ['from' => $this->from],
             $record
         ));
 
